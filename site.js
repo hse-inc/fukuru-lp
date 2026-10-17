@@ -56,17 +56,21 @@
       ticking = true;
       requestAnimationFrame(() => { ticking = false; sync(); });
     }, { passive: true });
-    let hold = 0;
-    voices.addEventListener('pointerdown', () => { hold = Date.now(); }, { passive: true });
+    let hold = 0, autoAt = 0;
+    const go = (i) => {
+      autoAt = Date.now();
+      voices.scrollTo({ left: cards[i].offsetLeft - (voices.clientWidth - cards[i].offsetWidth) / 2, behavior: 'smooth' });
+    };
+    voices.addEventListener('scroll', () => { if (Date.now() - autoAt > 1200) hold = Date.now(); }, { passive: true });
     setInterval(() => {
       if (document.hidden || Date.now() - hold < 8000) return;
       const r = voices.getBoundingClientRect();
       if (r.bottom < 0 || r.top > innerHeight) return;
-      const i = (nowIndex() + 1) % cards.length;
-      voices.scrollTo({ left: cards[i].offsetLeft - (voices.clientWidth - cards[i].offsetWidth) / 2, behavior: 'smooth' });
-    }, 4000);
+      go((nowIndex() + 1) % cards.length);
+    }, 3500);
     document.querySelectorAll('.voices__nav .arrow').forEach((b) => b.addEventListener('click', () => {
-      const i = Math.max(0, Math.min(cards.length - 1, nowIndex() + Number(b.dataset.dir)));
+      hold = Date.now();
+      const i = (nowIndex() + Number(b.dataset.dir) + cards.length) % cards.length;
       voices.scrollTo({ left: cards[i].offsetLeft - (voices.clientWidth - cards[i].offsetWidth) / 2, behavior: 'smooth' });
     }));
   }
