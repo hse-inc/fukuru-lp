@@ -2,40 +2,29 @@
   const hero = document.querySelector('.page--hero');
   if (hero) {
     const phs = [...hero.querySelectorAll('.fv__ph')];
-    const bgs = [...hero.querySelectorAll('.fv__bgimg')];
-    const days = [...hero.querySelectorAll('.cal__d')];
-    const STAMPS = [2, 5, 8, 10, 13, 16, 19];
-    let started = false, now = 0, stampAt = 0;
-    const stamp = () => {
-      if (stampAt >= STAMPS.length) { days.forEach((d) => d.classList.remove('is-stamp')); stampAt = 0; }
-      const d = days[STAMPS[stampAt++]];
-      if (d) d.classList.add('is-stamp');
-    };
+    let started = false, now = 0;
     const next = () => {
       const prev = now;
       now = (now + 1) % phs.length;
-      phs[prev].classList.remove('is-now');
-      phs[prev].classList.add('is-out');
-      phs[now].classList.remove('is-out');
-      phs[now].classList.add('is-now');
-      setTimeout(() => phs[prev].classList.remove('is-out'), 750);
-      bgs.forEach((g, i) => g.classList.toggle('is-now', i === now));
-      stamp();
+      phs[now].classList.add('is-in');
+      setTimeout(() => {
+        phs[prev].classList.remove('is-now');
+        phs[now].classList.remove('is-in');
+        phs[now].classList.add('is-now');
+      }, 950);
     };
     const start = () => {
       if (started) return;
       started = true;
       hero.classList.add('is-ready');
-      setTimeout(stamp, 1300);
-      if (phs.length > 1) setInterval(() => { if (!document.hidden) next(); }, 2800);
+      if (phs.length > 1) setInterval(() => { if (!document.hidden) next(); }, 3200);
     };
     const first = phs[0];
     if (first && first.decode) first.decode().then(start, start); else start();
     setTimeout(start, 1200);
   }
 
-  const track = document.querySelector('.reel__track');
-  if (track) {
+  document.querySelectorAll('.reel__track').forEach((track) => {
     const n = track.children.length;
     [...track.children].forEach((img) => track.appendChild(img.cloneNode(true)));
     const PXS = 30;
@@ -48,7 +37,7 @@
     Promise.all([...track.querySelectorAll('img')].map((i) => (i.decode ? i.decode().catch(() => {}) : null))).then(measure);
     let rt = null;
     window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(measure, 200); });
-  }
+  });
 
   const voices = document.getElementById('voices');
   if (voices) {
@@ -67,6 +56,15 @@
       ticking = true;
       requestAnimationFrame(() => { ticking = false; sync(); });
     }, { passive: true });
+    let hold = 0;
+    voices.addEventListener('pointerdown', () => { hold = Date.now(); }, { passive: true });
+    setInterval(() => {
+      if (document.hidden || Date.now() - hold < 8000) return;
+      const r = voices.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight) return;
+      const i = (nowIndex() + 1) % cards.length;
+      voices.scrollTo({ left: cards[i].offsetLeft - (voices.clientWidth - cards[i].offsetWidth) / 2, behavior: 'smooth' });
+    }, 4000);
     document.querySelectorAll('.voices__nav .arrow').forEach((b) => b.addEventListener('click', () => {
       const i = Math.max(0, Math.min(cards.length - 1, nowIndex() + Number(b.dataset.dir)));
       voices.scrollTo({ left: cards[i].offsetLeft - (voices.clientWidth - cards[i].offsetWidth) / 2, behavior: 'smooth' });
