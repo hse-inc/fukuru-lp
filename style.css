@@ -33,7 +33,10 @@
   font-weight: 700; line-height: 1.5; color: var(--color-on-dark); background: var(--color-main); border-radius: var(--radius-pill);
   transition: translate var(--dur-hover) var(--ease-out);
 }
-.pill--wide { width: 100%; margin-top: 0.6em; }
+.pill--wide { position: relative; width: 100%; margin-top: 0.6em; padding: 0.7em 2.6em; }
+.pill--wide .pill__dot { position: absolute; left: 1.2em; top: 50%; translate: 0 -50%; }
+.pill__t { display: grid; justify-items: center; text-align: center; }
+.pill__em { display: inline-block; margin: 0.1em 0.15em 0; padding: 0 0.35em; font-size: 1.35em; font-weight: 900; color: var(--color-main); background: var(--color-base); border-radius: 0.3em; }
 .pill__dot { flex: 0 0 auto; width: 0.95em; height: 0.95em; border-radius: 50%; border: 0.2em solid var(--color-on-dark); }
 @media (hover: hover) { .pill:hover { translate: 2px 3px; } }
 
